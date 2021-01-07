@@ -1,13 +1,9 @@
-/**
- * Every call of useState() or useReducer() should create an independent state object that persists over the lifetime of the component.
- */
-
 let hookStates = []
 
 // reset on every render
 let ptr = 0
 
-function getOrCreateHookState () {
+function getHookState () {
   const head = ptr
   if (!hookStates[ptr]) {
     const hs = {}
@@ -18,8 +14,7 @@ function getOrCreateHookState () {
 }
 
 function useReducer (reducer, initialState, initialize) {
-  const hs = getOrCreateHookState()
-
+  const hs = getHookState()
   if (!hs.value) {
     hs.value = [
       initialize ? initialize(initialState) : initialState,
@@ -28,13 +23,57 @@ function useReducer (reducer, initialState, initialize) {
       },
     ]
   }
-
   return hs.value
 }
 
 function useState (initialState) {
   return useReducer(
     (_, newState) => newState,
-    initialState
+    initialState,
   )
+}
+
+function haveDepsChanged (oldDeps, newDeps) {
+  function compareArray (xs, ys) {
+    if (xs.length !== ys.length) {
+      return true
+    }
+    for (let i = 0; i < xs.length; i++) {
+      if (xs[i] !== ys[i]) {
+        return true
+      }
+    }
+    return false
+  }
+
+  if (typeof oldDeps === 'undefined') return true
+  return compareArray(oldDeps, newDeps)
+}
+
+function useEffect (effect, deps) {
+  const hs = getHookState()
+
+  const shouldScheduleEffect =
+      typeof deps === 'undefined' ||
+      haveDepsChanged(hs.deps, deps)
+
+  if (shouldScheduleEffect) {
+    hs.deps = deps
+    hs.value = effect
+    // FIXME schedule a call to the effect callback
+  }
+}
+
+function useLayoutEffect (effect, deps) {
+  const hs = getHookState()
+
+  const shouldScheduleEffect =
+      typeof deps === 'undefined' ||
+      haveDepsChanged(hs.deps, deps)
+
+  if (shouldScheduleEffect) {
+    hs.deps = deps
+    hs.value = effect
+    // FIXME schedule a call to the effect callback
+  }
 }
