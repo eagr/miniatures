@@ -29,12 +29,12 @@ function useReducer (reducer, initialState, initialize) {
 function useState (initialState) {
   return useReducer(
     (_, newState) => newState,
-    initialState,
+    initialState
   )
 }
 
 function haveDepsChanged (oldDeps, newDeps) {
-  function compareArray (xs, ys) {
+  const compareArrays = function (xs, ys) {
     if (xs.length !== ys.length) {
       return true
     }
@@ -47,7 +47,7 @@ function haveDepsChanged (oldDeps, newDeps) {
   }
 
   if (typeof oldDeps === 'undefined') return true
-  return compareArray(oldDeps, newDeps)
+  return compareArrays(oldDeps, newDeps)
 }
 
 function useEffect (effect, deps) {
@@ -76,4 +76,17 @@ function useLayoutEffect (effect, deps) {
     hs.value = effect
     // FIXME schedule a call to the effect callback
   }
+}
+
+function useMemo (factory, deps) {
+  const hs = getHookState()
+  if (haveDepsChanged(hs.deps, deps)) {
+    hs.deps = deps
+    hs.memoized = factory()
+  }
+  return hs.memoized
+}
+
+function useCallback (callback, deps) {
+  return useMemo(() => callback, deps)
 }
