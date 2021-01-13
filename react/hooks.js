@@ -90,3 +90,7 @@ function useMemo (factory, deps) {
 function useCallback (callback, deps) {
   return useMemo(() => callback, deps)
 }
+
+function useRef (initialState) {
+  return useMemo(() => ({ current: initialState }), [])
+}
