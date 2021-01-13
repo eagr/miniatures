@@ -52,12 +52,7 @@ function haveDepsChanged (oldDeps, newDeps) {
 
 function useEffect (effect, deps) {
   const hs = getHookState()
-
-  const shouldScheduleEffect =
-      typeof deps === 'undefined' ||
-      haveDepsChanged(hs.deps, deps)
-
-  if (shouldScheduleEffect) {
+  if (haveDepsChanged(hs.deps, deps)) {
     hs.deps = deps
     hs.value = effect
     // FIXME schedule a call to the effect callback
@@ -66,12 +61,7 @@ function useEffect (effect, deps) {
 
 function useLayoutEffect (effect, deps) {
   const hs = getHookState()
-
-  const shouldScheduleEffect =
-      typeof deps === 'undefined' ||
-      haveDepsChanged(hs.deps, deps)
-
-  if (shouldScheduleEffect) {
+  if (haveDepsChanged(hs.deps, deps)) {
     hs.deps = deps
     hs.value = effect
     // FIXME schedule a call to the effect callback
